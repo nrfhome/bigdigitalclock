@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Digital Clock</string>
+    <string name="action_settings">Settings</string>
+    <string name="key_rotation" translatable="false">de.felixonyu.bigclock.preference.rotation</string>
+    <string name="key_foreground_color_normal" translatable="false">
+        de.felixonyu.bigclock.preference.foreground_color_normal
+    </string>
+    <string name="title_foreground_color">Text color</string>
+    <string name="key_background_color_normal" translatable="false">
+        de.felixonyu.bigclock.preference.background_color_normal
+    </string>
+    <string name="title_background_color">Background color</string>
+    <string name="key_foreground_color_night" translatable="false">
+        de.felixonyu.bigclock.preference.foreground_color_night
+    </string>
+    <string name="title_rotation">Orientation</string>
+    <string name="key_background_color_night" translatable="false">
+        de.felixonyu.bigclock.preference.background_color_night
+    </string>
+    <string name="key_night_mode" translatable="false">
+        de.felixonyu.bigclock.preference.night_mode
+    </string>
+    <string name="title_night_mode">Night mode</string>
+    <string name="key_alarmclock" translatable="false">
+        de.felixonyu.bigclock.preference.alarm_clock
+    </string>
+    <string name="title_alarm_clock">Alarm</string>
+    <string name="key_seconds" translatable="false">
+        de.felixonyu.bigclock.preference.seconds
+    </string>
+    <string name="title_seconds">Show seconds</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="key_keep_screen_on" translatable="false">
+        de.felixonyu.bigclock.preference.keep_screen_on
+    </string>
+    <string name="title_keep_screen_on">Keep screen on</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>
+

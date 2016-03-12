@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">Einstellungen</string>
+    <string name="title_background_color">Hintergrundfarbe</string>
+    <string name="title_foreground_color">Textfarbe</string>
+    <string name="title_rotation">Ausrichtung</string>
+    <string name="title_night_mode">Nacht Modus</string>
+    <string name="title_alarm_clock">Wecker</string>
+    <string name="app_name">Digitaluhr</string>
+    <string name="title_seconds">Sekundenanzeige</string>
+    <string name="off">Aus</string>
+    <string name="on">An</string>
+    <string name="title_keep_screen_on">Bildschirm immer an</string>
+    <string name="no">Nein</string>
+    <string name="yes">Ja</string>
+</resources>

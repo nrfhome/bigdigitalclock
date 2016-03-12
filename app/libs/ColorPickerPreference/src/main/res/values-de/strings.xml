@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="press_color_to_apply">Farbe drücken zum Übernehmen</string>
+    <string name="dialog_color_picker">Farbe auswählen</string>
+</resources>
