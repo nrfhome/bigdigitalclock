@@ -2,11 +2,13 @@ package de.andreas1724.bigdigitalclock;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
+import android.view.MenuItem;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -23,6 +25,9 @@ public class ClockPreferenceActivity extends PreferenceActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         keys = MyStringKeys.getInstance(this);
         addPreferencesFromResource(R.xml.settings);
         foregroundNormal = (ColorPickerPreference) findPreference(keys.FOREGROUND_COLOR_NORMAL);
@@ -52,7 +57,7 @@ public class ClockPreferenceActivity extends PreferenceActivity
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 Intent i;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     i = new Intent(AlarmClock.ACTION_SHOW_ALARMS);
                 } else {
                     i = new Intent(AlarmClock.ACTION_SET_ALARM);
@@ -85,7 +90,7 @@ public class ClockPreferenceActivity extends PreferenceActivity
 
     @Override
     protected void onResume() {
-        findPreference(keys.ALARM_CLOCK).setSummary(AlarmTimeTool.getNextAlarmAndDays(this));
+        findPreference(keys.ALARM_CLOCK).setSummary(TimeTool.getNextAlarmAndDays(this));
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         super.onResume();
     }
@@ -124,5 +129,13 @@ public class ClockPreferenceActivity extends PreferenceActivity
                 setNormalColorSummaries();
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        }
+        return false;
     }
 }

@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
-        android:title="@string/title_rotation"
+        android:defaultValue="0"
+        android:entries="@array/entries_rotation"
+        android:entryValues="@array/values_rotation"
+        android:icon="@android:drawable/ic_menu_always_landscape_portrait"
         android:key="@string/key_rotation"
         android:summary="%s"
-        android:defaultValue="2"
-        android:icon="@android:drawable/ic_menu_always_landscape_portrait"
-        android:entries="@array/entries_rotation"
-        android:entryValues="@array/values_rotation" />
+        android:title="@string/title_rotation"/>
     <CheckBoxPreference
-        android:key="@string/key_night_mode"
-        android:title="@string/title_night_mode"
+        android:defaultValue="false"
         android:icon="@mipmap/night_mode"
-        android:summaryOn="@string/on"
+        android:key="@string/key_night_mode"
         android:summaryOff="@string/off"
-        android:defaultValue="false" />
+        android:summaryOn="@string/on"
+        android:title="@string/title_night_mode"/>
     <Preference
+        android:icon="@android:drawable/ic_menu_recent_history"
         android:key="@string/key_alarmclock"
-        android:title="@string/title_alarm_clock"
-        android:icon="@android:drawable/ic_menu_recent_history">
+        android:title="@string/title_alarm_clock">
     </Preference>
     <net.margaritov.preference.colorpicker.ColorPickerPreference
+        android:defaultValue="@integer/COLOR_GREEN"
         android:key="@string/key_foreground_color_normal"
-        android:title="@string/title_foreground_color"
-        android:defaultValue="@integer/COLOR_GREEN" />
+        android:title="@string/title_foreground_color"/>
     <net.margaritov.preference.colorpicker.ColorPickerPreference
+        android:defaultValue="@integer/COLOR_BLACK"
         android:key="@string/key_background_color_normal"
-        android:title="@string/title_background_color"
-        android:defaultValue="@integer/COLOR_BLACK" />
+        android:title="@string/title_background_color"/>
     <net.margaritov.preference.colorpicker.ColorPickerPreference
+        android:defaultValue="@integer/COLOR_DARKGREEN"
         android:key="@string/key_foreground_color_night"
-        android:title="@string/title_foreground_color"
-        android:defaultValue="@integer/COLOR_DARKGREEN" />
+        android:title="@string/title_foreground_color"/>
     <net.margaritov.preference.colorpicker.ColorPickerPreference
+        android:defaultValue="@integer/COLOR_BLACK"
         android:key="@string/key_background_color_night"
-        android:title="@string/title_background_color"
-        android:defaultValue="@integer/COLOR_BLACK" />
+        android:title="@string/title_background_color"/>
     <CheckBoxPreference
+        android:defaultValue="true"
         android:key="@string/key_seconds"
-        android:title="@string/title_seconds"
-        android:summaryOn="@string/on"
         android:summaryOff="@string/off"
-        android:defaultValue="false" />
+        android:summaryOn="@string/on"
+        android:title="@string/title_seconds"/>
     <CheckBoxPreference
+        android:defaultValue="true"
         android:key="@string/key_keep_screen_on"
-        android:title="@string/title_keep_screen_on"
-        android:summaryOn="@string/yes"
         android:summaryOff="@string/no"
-        android:defaultValue="true" />
+        android:summaryOn="@string/yes"
+        android:title="@string/title_keep_screen_on"/>
 </PreferenceScreen>

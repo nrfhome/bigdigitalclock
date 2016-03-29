@@ -4,13 +4,14 @@
 
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/AppTheme">
         <activity
-            android:name="de.andreas1724.bigdigitalclock.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -19,7 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="de.andreas1724.bigdigitalclock.ClockPreferenceActivity"/>
+        <activity android:name="de.andreas1724.bigdigitalclock.ClockPreferenceActivity"
+            android:theme="@style/AppTheme.ActionBar"/>
     </application>
 
 </manifest>

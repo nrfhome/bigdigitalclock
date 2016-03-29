@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AlarmTimeTool {
+public class TimeTool {
 
     public static long getNextAlarmMilliseconds(Context context) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -27,7 +27,7 @@ public class AlarmTimeTool {
         }
         String nextAlarm = Settings.System.getString(context.getContentResolver(), Settings.System
                 .NEXT_ALARM_FORMATTED);
-        if (nextAlarm == null || nextAlarm.isEmpty()) {
+        if (nextAlarm == null || nextAlarm.length() == 0) {
             return -1;
         }
         String[] weekdays = DateFormatSymbols.getInstance().getShortWeekdays();
@@ -43,6 +43,13 @@ public class AlarmTimeTool {
      */
     public static String getShortTime(Context context, long milliseconds) {
         SimpleDateFormat simpleDateFormat = DateFormat.is24HourFormat(context)?
+                new SimpleDateFormat("H:mma", Locale.US):
+                new SimpleDateFormat("h:mma", Locale.US);
+        return String.format("%7s", simpleDateFormat.format(new Date(milliseconds)));
+    }
+
+    public static String getShortTime(long milliseconds, boolean is24HourFormat) {
+        SimpleDateFormat simpleDateFormat = is24HourFormat?
                 new SimpleDateFormat("H:mma", Locale.US):
                 new SimpleDateFormat("h:mma", Locale.US);
         return String.format("%7s", simpleDateFormat.format(new Date(milliseconds)));
