@@ -16,9 +16,9 @@ import java.util.Locale;
 public class DigitalClock extends View {
 
     private static final float TEXT_SIZE_START = 1000f; // arbitrary value to start with
-    private static final float AMPM_TIME_RATIO = 0.5f; // max. 0.4
-    private static final float ALARM_TIME_RATIO = 1f / 5; // max. 1/5
-    private static final float GAP_TIME_RATIO = 0.03f;
+    private static final float AMPM_TIME_RATIO = 0.5f;
+    private static final float ALARM_TIME_RATIO = 1f / 5;
+    private static final float GAP_TIME_RATIO = 0.05f;
     private static final float SECONDS_TIME_RATIO =
             new Float((3 - Math.sqrt(5)) / 2); // golden ratio ;-)
     private static final String FONT = "segments.ttf";
@@ -240,6 +240,7 @@ public class DigitalClock extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        //Log.d(">>>>", "Time = " + System.currentTimeMillis());
         if (isSeconds) {
             canvas.drawText(seconds.txt, seconds.x, seconds.y, secondsPaint);
         }

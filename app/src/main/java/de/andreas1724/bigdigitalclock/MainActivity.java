@@ -195,6 +195,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Runnable showNextSecond = new Runnable() {
         @Override
         public void run() {
+            if (sec == 0) {
+                showActualTime();
+                return;
+            }
             timeChangeHandler.postDelayed(showNextSecond, 1000);
             addSecond();
             digitalClock.setSeconds(sec);
