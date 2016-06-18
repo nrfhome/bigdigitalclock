@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 
 /**
  * Created by andreas on 16.03.16.
+ * Changed by andreas on 18.06.16.
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             digitalClock = new DigitalClock(this);
             layout.addView(digitalClock);
         }
+        // To prevent "Font size too large to fit in cache". Switch off hardware acceleration:
+        digitalClock.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
     }
 
     private void openPreferenceSite() {
@@ -220,7 +223,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void showNextAlarm() {
-        long alarmMilliseconds = TimeTool.getNextAlarmMilliseconds(this);
+        long alarmMilliseconds;
+        try {
+            alarmMilliseconds = TimeTool.getNextAlarmMilliseconds(this);
+        } catch (Exception e) {
+            alarmMilliseconds = -1;
+        }
         digitalClock.setAlarm(alarmMilliseconds);
     }
 
