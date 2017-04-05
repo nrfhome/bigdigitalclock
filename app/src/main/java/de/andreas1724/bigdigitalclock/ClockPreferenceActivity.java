@@ -66,6 +66,8 @@ public class ClockPreferenceActivity extends PreferenceActivity
                 return true;
             }
         });
+
+
     }
 
 

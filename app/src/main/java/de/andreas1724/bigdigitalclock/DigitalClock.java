@@ -11,7 +11,7 @@ import android.view.View;
 import java.util.Locale;
 
 /**
- * Created by andreas on 16.03.16.
+ * Created on 16.03.16.
  */
 public class DigitalClock extends View {
 
@@ -20,7 +20,7 @@ public class DigitalClock extends View {
     private static final float ALARM_TIME_RATIO = 1f / 5;
     private static final float GAP_TIME_RATIO = 0.05f;
     private static final float SECONDS_TIME_RATIO =
-            new Float((3 - Math.sqrt(5)) / 2); // golden ratio ;-)
+            (float) ((3 - Math.sqrt(5)) / 2); // golden ratio ;-)
     private static final String FONT = "segments.ttf";
     /*
     In this font:
@@ -35,10 +35,10 @@ public class DigitalClock extends View {
     private static final String LARGEST_24TIME = "20:00";
     private static final String LARGEST_12TIME = "12:00";
 
-    class SomeText {
+    private class SomeText {
         float x, y;
         String txt;
-        public SomeText() {
+        SomeText() {
             x = 0;
             y = 0;
             txt = "";
@@ -80,7 +80,7 @@ public class DigitalClock extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         canvasWidth = w;
         canvasHeight = h;
-        boundingRect.set(0, 0, w, h);
+        boundingRect.set(0, 0, canvasWidth, canvasHeight);
         init();
     }
 
@@ -217,8 +217,11 @@ public class DigitalClock extends View {
     }
 
     public void setAlarm(long milliseconds) {
-        if (milliseconds < 0) {
+        if (milliseconds == 0) {
             alarm.txt = "}";
+            return;
+        } else if (milliseconds < 0) {
+            alarm.txt = "{";
             return;
         }
         String alarmTime = TimeTool.getShortTime(milliseconds, is24HourFormat);
@@ -240,7 +243,6 @@ public class DigitalClock extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //Log.d(">>>>", "Time = " + System.currentTimeMillis());
         if (isSeconds) {
             canvas.drawText(seconds.txt, seconds.x, seconds.y, secondsPaint);
         }

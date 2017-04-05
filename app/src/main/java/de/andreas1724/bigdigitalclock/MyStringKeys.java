@@ -3,18 +3,18 @@ package de.andreas1724.bigdigitalclock;
 import android.content.Context;
 
 /**
- * Created by andreas on 27.02.16.
+ * Created on 27.02.16.
  */
-public class MyStringKeys {
-    public final String ROTATION;
-    public final String FOREGROUND_COLOR_NORMAL;
-    public final String BACKGROUND_COLOR_NORMAL;
-    public final String FOREGROUND_COLOR_NIGHT;
-    public final String BACKGROUND_COLOR_NIGHT;
-    public final String NIGHT_MODE;
-    public final String ALARM_CLOCK;
-    public final String SECONDS;
-    public final String KEEP_SCREEN_ON;
+class MyStringKeys {
+    final String ROTATION;
+    final String FOREGROUND_COLOR_NORMAL;
+    final String BACKGROUND_COLOR_NORMAL;
+    final String FOREGROUND_COLOR_NIGHT;
+    final String BACKGROUND_COLOR_NIGHT;
+    final String NIGHT_MODE;
+    final String ALARM_CLOCK;
+    final String SECONDS;
+    final String KEEP_SCREEN_ON;
 
     private static MyStringKeys keys = null;
 
@@ -34,7 +34,7 @@ public class MyStringKeys {
         KEEP_SCREEN_ON = context.getResources().getString(R.string.key_keep_screen_on);
     }
 
-    public static MyStringKeys getInstance(Context context) {
+    static MyStringKeys getInstance(Context context) {
         if (keys == null) {
             keys = new MyStringKeys(context);
         }
