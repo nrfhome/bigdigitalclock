@@ -85,7 +85,7 @@ class TimeTool {
 
     static String getNextAlarmAndDays(Context context) {
         long alarmMilliseconds = getNextAlarmMilliseconds(context);
-        if (alarmMilliseconds < 0) {
+        if (alarmMilliseconds <= 0) {
             return "--:--";
         }
         long diff = alarmMilliseconds - System.currentTimeMillis();

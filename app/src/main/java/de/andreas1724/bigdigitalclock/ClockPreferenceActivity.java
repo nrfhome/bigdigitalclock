@@ -1,5 +1,6 @@
 package de.andreas1724.bigdigitalclock;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -8,6 +9,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
+import android.util.Log;
 import android.view.MenuItem;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -62,7 +64,11 @@ public class ClockPreferenceActivity extends PreferenceActivity
                 } else {
                     i = new Intent(AlarmClock.ACTION_SET_ALARM);
                 }
-                startActivity(i);
+                try {
+                    startActivity(i);
+                } catch (ActivityNotFoundException e) {
+                    Log.e("ClockPreferenceActivity", "Could not show/set alarm: " + e.getMessage());
+                };
                 return true;
             }
         });
