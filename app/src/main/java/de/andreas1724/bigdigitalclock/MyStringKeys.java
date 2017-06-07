@@ -15,6 +15,8 @@ class MyStringKeys {
     final String ALARM_CLOCK;
     final String SECONDS;
     final String KEEP_SCREEN_ON;
+    final String MOVE_CLOCK;
+    final String INFO;
 
     private static MyStringKeys keys = null;
 
@@ -32,6 +34,8 @@ class MyStringKeys {
         ALARM_CLOCK = context.getResources().getString(R.string.key_alarmclock);
         SECONDS = context.getResources().getString(R.string.key_seconds);
         KEEP_SCREEN_ON = context.getResources().getString(R.string.key_keep_screen_on);
+        MOVE_CLOCK = context.getResources().getString(R.string.key_move_clock);
+        INFO = context.getResources().getString(R.string.key_info);
     }
 
     static MyStringKeys getInstance(Context context) {

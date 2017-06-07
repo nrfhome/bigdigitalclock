@@ -16,17 +16,6 @@ import java.util.regex.Pattern;
 
 class TimeTool {
 
-//    private static String concatStringArray(String[] str, String seperator) {
-//        StringBuilder result = new StringBuilder();
-//        for (int i = 0; i < str.length; ++i) {
-//            result.append(str[i]);
-//            if (i + 1 < str.length) {
-//                result.append(seperator);
-//            }
-//        }
-//        return result.toString();
-//    }
-
     // no alarm => return 0
     // unreadable alarm => return -1
     // alarm fetched => return alarm time in milliseconds
@@ -42,16 +31,12 @@ class TimeTool {
         }
         String nextAlarm = Settings.System.getString(context.getContentResolver(), Settings.System
                 .NEXT_ALARM_FORMATTED);
-        // Log.d("TimeTool.java", nextAlarm);
         if (nextAlarm == null || nextAlarm.length() == 0) {
             return 0;
         }
         String[] weekdays = DateFormatSymbols.getInstance().getShortWeekdays();
-        // Log.d("TimeTool.java", "Short names for weekdays = " +
-        //        TimeTool.concatStringArray(weekdays, ", "));
 
         String[] amPm = DateFormatSymbols.getInstance().getAmPmStrings();
-        // Log.d("TimeTool.java", "AM / PM = " + TimeTool.concatStringArray(amPm, " / "));
 
         long milliseconds;
         try {

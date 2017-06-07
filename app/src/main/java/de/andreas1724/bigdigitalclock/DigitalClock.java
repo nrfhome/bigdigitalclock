@@ -34,6 +34,9 @@ public class DigitalClock extends View {
     private static final String LARGEST_AMPM = "AM";
     private static final String LARGEST_24TIME = "20:00";
     private static final String LARGEST_12TIME = "12:00";
+    private static final int NO_FLIP = 0;
+    private static final int VERTICAL_FLIP = 1;
+    private static final int HORIZONTAL_FLIP = 2;
 
     private class SomeText {
         float x, y;
@@ -59,6 +62,12 @@ public class DigitalClock extends View {
     private Paint alarmPaint;
     private int canvasWidth, canvasHeight;
     private Rect boundingRect = new Rect();
+    private boolean isScreensaverMode = true;
+    private final static double SIZE_SCREENSAVER_MODE = 0.90d;
+
+    private int velocity; // bounding rect velocity in pixel distance per step
+    int dx, dy;
+    private int flipped = DigitalClock.NO_FLIP;
 
     private Rect r = new Rect(); // we will need this for measuring text boundss
 
@@ -80,7 +89,6 @@ public class DigitalClock extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         canvasWidth = w;
         canvasHeight = h;
-        boundingRect.set(0, 0, canvasWidth, canvasHeight);
         init();
     }
 
@@ -88,12 +96,136 @@ public class DigitalClock extends View {
         this.isSeconds = isSeconds;
     }
 
+    public void setScreensaverMode(boolean screensaverMode) {
+        this.isScreensaverMode = screensaverMode;
+    }
+
+    public void moveOneStep() {
+        //flipped = DigitalClock.NO_FLIP;
+        boundingRect.offsetTo(boundingRect.left + dx, boundingRect.top + dy);
+        int count = 1;
+        while (isOutOfScreen()) {
+            if (count++ > 10) {
+                randomizePosition();
+                randomizeMotion();
+                break;
+            }
+            if (dx > 0) {
+                flipHorizontally();
+            }
+            if (dy > 0) {
+                flipVertically();
+            }
+            bounceBack();
+            if ((flipped & DigitalClock.HORIZONTAL_FLIP) != 0) {
+                flipHorizontally();
+            }
+            if ((flipped & DigitalClock.VERTICAL_FLIP) != 0) {
+                flipVertically();
+            }
+        }
+        setAllPositions();
+    }
+
+    // requirement: dx <= 0 && dy <= 0 && (boundingRect.left < 0 || boundingRect.top < 0)
+    private boolean intersectsXAxisFirst() {
+        if (dx == 0) return true;
+        if (dy == 0) return false;
+        if (boundingRect.left - dx == 0) return false;
+        double gradientToPoint = (float)dy / dx;
+        double gradientToOrigin = (float)(boundingRect.top - dy) / (boundingRect.left - dx);
+        return gradientToPoint > gradientToOrigin;
+    }
+
+    private static final double square(double x) {
+        return Math.pow(x, 2);
+    }
+
+    /**
+     * bounceBack() requires negative vertical and horizontal moving (to the top, left). Flip before
+     * and after bounceBack() if other direction.
+     */
+    private void bounceBack() {
+        if (intersectsXAxisFirst()) {
+            double intersection = boundingRect.left - dx - (boundingRect.top - dy) * dx / dy;
+            double radiusFromIntersection = velocity * boundingRect.top / dy;
+            double min = Math.max(intersection - radiusFromIntersection, 0);
+            double nextX = min + Math.random() * radiusFromIntersection;
+            double nextY = Math.sqrt(square(radiusFromIntersection) - square(intersection - nextX));
+            double dxTemp = nextX - intersection;
+            double dyTemp = nextY;
+            dx = (int) (dxTemp * velocity / radiusFromIntersection);
+            dy = (int) (dyTemp * velocity / radiusFromIntersection);
+            boundingRect.offsetTo((int) nextX, (int) nextY);
+        } else {
+            double intersection = boundingRect.top - dy - (boundingRect.left - dx) * dy / dx;
+            double radiusFromIntersection = velocity * boundingRect.left / dx;
+            double min = Math.max(intersection - radiusFromIntersection, 0);
+            double nextY = min + Math.random() * radiusFromIntersection;
+            double nextX = Math.sqrt(square(radiusFromIntersection) - square(intersection - nextY));
+            double dyTemp = nextY - intersection;
+            double dxTemp = nextX;
+            dx = (int) (dxTemp * velocity / radiusFromIntersection);
+            dy = (int) (dyTemp * velocity / radiusFromIntersection);
+            boundingRect.offsetTo((int) nextX, (int) nextY);
+        }
+    }
+
+    private void flipHorizontally() {
+        boundingRect.set(canvasWidth - boundingRect.right -1,
+                boundingRect.top,
+                canvasWidth - boundingRect.left - 1,
+                boundingRect.bottom);
+        dx = -dx;
+        flipped ^= DigitalClock.HORIZONTAL_FLIP;
+    }
+
+    private void flipVertically() {
+        boundingRect.set(boundingRect.left,
+                canvasHeight - boundingRect.bottom -1,
+                boundingRect.right,
+                canvasHeight - boundingRect.top -1);
+        dy = -dy;
+        flipped ^= DigitalClock.VERTICAL_FLIP;
+    }
+
+    private boolean isOutOfScreen() {
+        return boundingRect.left < 0 || boundingRect.right >= canvasWidth || boundingRect.top < 0 ||
+                boundingRect.bottom >= canvasHeight;
+    }
+
+    private void setVelocity() {
+        velocity = Math.max(5, (int) (Math.sqrt(canvasWidth * canvasHeight) / 80));
+    }
+
+    private void randomizePosition() {
+        int x = (int) (Math.random() * (canvasWidth - boundingRect.width()));
+        int y = (int) (Math.random() * (canvasHeight - boundingRect.height()));
+        boundingRect.offsetTo(x, y);
+    }
+
+    private void randomizeMotion() {
+        dx = (int) (Math.random() * (velocity + 1));
+        dy = (int) Math.sqrt(square(velocity) - square(dx));
+        dx *= Math.random() * 2 > 1 ? -1: 1;
+        dy *= Math.random() * 2 > 1 ? -1: 1;
+    }
+
     public void init() {
         is24HourFormat = DateFormat.is24HourFormat(context);
         hoursMinutesTextSize = getWidestPossibleTextSize();
         setAllTextSizes(hoursMinutesTextSize);
         recalculateIfTextTooHigh();
+        if (isScreensaverMode) {
+            hoursMinutesTextSize *= SIZE_SCREENSAVER_MODE;
+        }
+        setAllTextSizes(hoursMinutesTextSize);
         calculateBoundingRect();
+        if (isScreensaverMode) {
+            setVelocity();
+            randomizePosition();
+            randomizeMotion();
+        }
         setAllPositions();
     }
 
@@ -142,9 +274,8 @@ public class DigitalClock extends View {
     private void recalculateIfTextTooHigh() {
         int height = getTotalHeight();
         if (height > canvasHeight) {
-            hoursMinutesTextSize *= ((float) canvasHeight / (float) height);
+            hoursMinutesTextSize *= (float) canvasHeight / (float) height;
         }
-        setAllTextSizes(hoursMinutesTextSize);
     }
 
     private int getTotalHeight() {
@@ -204,16 +335,10 @@ public class DigitalClock extends View {
             int sec = (int) ((milliseconds / 1000) % 60);
             seconds.txt = String.format(Locale.US, "%02d", sec);
         }
-        invalidate();
     }
 
     public void setSeconds(int sec) {
         seconds.txt = String.format(Locale.US, "%02d", sec);
-        if (sec == 0) {
-            setTime(System.currentTimeMillis());
-        } else {
-            invalidate();
-        }
     }
 
     public void setAlarm(long milliseconds) {

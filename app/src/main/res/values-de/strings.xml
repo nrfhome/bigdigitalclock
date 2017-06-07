@@ -13,4 +13,6 @@
     <string name="title_keep_screen_on">Bildschirm immer an</string>
     <string name="no">Nein</string>
     <string name="yes">Ja</string>
+    <string name="title_move_clock">Bewege Uhr</string>
+    <string name="title_info">Info</string>
 </resources>

@@ -43,9 +43,18 @@
         android:summaryOn="@string/on"
         android:title="@string/title_seconds"/>
     <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/key_move_clock"
+        android:summaryOff="@string/off"
+        android:summaryOn="@string/on"
+        android:title="@string/title_move_clock"/>
+    <CheckBoxPreference
         android:defaultValue="true"
         android:key="@string/key_keep_screen_on"
         android:summaryOff="@string/no"
         android:summaryOn="@string/yes"
         android:title="@string/title_keep_screen_on"/>
+    <Preference
+        android:key="@string/key_info"
+        android:title="@string/title_info"/>
 </PreferenceScreen>

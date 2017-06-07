@@ -27,11 +27,12 @@ public class MainActivity extends AppCompatActivity implements View
 
     private DigitalClock digitalClock = null;
     private boolean isSeconds = false;
+    private boolean isScreensaverMode = false;
     private FrameLayout layout;
     private FloatingActionButton fab;
     private static MyStringKeys keys;
     private static ScheduledThreadPoolExecutor timeCountExecutor;
-    private static ScheduledFuture t;
+    private static ScheduledFuture timer;
     private static final int FULLSCREEN_OPTIONS = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -245,6 +246,10 @@ public class MainActivity extends AppCompatActivity implements View
                 getBoolean(keys.SECONDS, false);
 
         digitalClock.showSeconds(isSeconds);
+
+        isScreensaverMode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(keys.MOVE_CLOCK, false);
+        digitalClock.setScreensaverMode(isScreensaverMode);
         digitalClock.init();
         timeCountExecutor = new ScheduledThreadPoolExecutor(1);
 
@@ -264,27 +269,39 @@ public class MainActivity extends AppCompatActivity implements View
 
     private volatile int sec;
 
-    private void addSecond() {
-        sec += 1;
+    private void addSeconds(int numberOfSeconds) {
+        sec += numberOfSeconds;
         if (sec > 59) {
-            sec = 0;
+            sec = 60 % numberOfSeconds;
         }
     }
 
     private Runnable showNextSecond = new Runnable() {
         @Override
         public void run() {
+            addSeconds(1);
+            digitalClock.setSeconds(sec);
+            if (isScreensaverMode && sec % 4 == 0) {
+                digitalClock.moveOneStep();
+            }
             if (sec == 0) {
                 showActualTime();
                 return;
             }
-            addSecond();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    digitalClock.setSeconds(sec);
-                }
-            });
+            digitalClock.postInvalidate();
+        }
+    };
+
+    private Runnable showTimeNext4Seconds = new Runnable() {
+        @Override
+        public void run() {
+            digitalClock.moveOneStep();
+            addSeconds(4);
+            if (sec == 0) {
+                showActualTime();
+                return;
+            }
+            digitalClock.postInvalidate();
         }
     };
 
@@ -292,24 +309,24 @@ public class MainActivity extends AppCompatActivity implements View
         final long milliseconds = System.currentTimeMillis();
         int msec = (int) (milliseconds % 60000);
         sec = msec / 1000;
-        if (t != null) {
-            t.cancel(false);
+        if (timer != null) {
+            timer.cancel(false);
         }
         if (isSeconds) {
             int nextSec = 1000 - msec % 1000;
-            t = timeCountExecutor.scheduleAtFixedRate(showNextSecond, nextSec, 1000, TimeUnit
-                    .MILLISECONDS);
+            timer = timeCountExecutor.scheduleAtFixedRate(showNextSecond, nextSec, 1000,
+                    TimeUnit.MILLISECONDS);
+        } else if (isScreensaverMode) {
+            int next4Sec = 4000 - msec % 4000;
+            timer = timeCountExecutor.scheduleAtFixedRate(showTimeNext4Seconds, next4Sec, 4000,
+                    TimeUnit.MILLISECONDS);
         } else {
             int nextMin = 60000 - msec;
-            t = timeCountExecutor.scheduleAtFixedRate(showTimeNextMinute, nextMin, 60000, TimeUnit
-                    .MILLISECONDS);
+            timer = timeCountExecutor.scheduleAtFixedRate(showTimeNextMinute, nextMin, 60000,
+                    TimeUnit.MILLISECONDS);
         }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                digitalClock.setTime(milliseconds);
-            }
-        });
+        digitalClock.setTime(milliseconds);
+        digitalClock.postInvalidate();
     }
 
     private void showNextAlarm() {

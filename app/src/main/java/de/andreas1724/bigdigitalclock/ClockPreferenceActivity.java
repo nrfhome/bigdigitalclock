@@ -73,10 +73,11 @@ public class ClockPreferenceActivity extends PreferenceActivity
             }
         });
 
+        findPreference(keys.INFO).setSummary(
+                getResources().getString(R.string.app_name_playstore) + " " +
+                        BuildConfig.VERSION_NAME);
 
     }
-
-
 
     private void setNormalColorSummaries() {
         int backgroundColorNormal = PreferenceManager.getDefaultSharedPreferences(this).getInt(
