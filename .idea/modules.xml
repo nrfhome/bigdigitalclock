@@ -5,6 +5,15 @@
       <module fileurl="file://$PROJECT_DIR$/BigDigitalClock.iml" filepath="$PROJECT_DIR$/BigDigitalClock.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/libs/ColorPickerPreference/ColorPickerPreference.iml" filepath="$PROJECT_DIR$/app/libs/ColorPickerPreference/ColorPickerPreference.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bigdigitalclock.iml" filepath="$PROJECT_DIR$/.idea/modules/bigdigitalclock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.iml" filepath="$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/libs/ColorPickerPreference/bigdigitalclock.ColorPickerPreference.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bigdigitalclock.app.unitTest.iml" />
     </modules>
   </component>
 </project>
