@@ -318,6 +318,12 @@ public class MainActivity extends AppCompatActivity implements View
         if (isBleMode) {
             milliseconds = TimeBeaconReceiverService.currentTimeMillis();
             TimeBeaconReceiverService.maybeResync(this);
+            if (TimeBeaconReceiverService.isRecentUpdateAvailable()) {
+                setColors();
+            } else {
+                // Turn the clock red if we can't receive beacons anymore
+                digitalClock.setColors(0xffff0000);
+            }
         } else {
             milliseconds = System.currentTimeMillis();
         }
