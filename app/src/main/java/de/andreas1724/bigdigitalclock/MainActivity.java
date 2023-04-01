@@ -53,18 +53,27 @@ public class MainActivity extends AppCompatActivity implements View
     private Runnable autoHide = new Runnable() {
         @Override
         public void run() {
-            if (fab.isShown()) {
-                fab.hide();
-            }
+            setFabState(false);
         }
     };
+
+    private void setFabState(boolean show) {
+        if (show) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            fab.show();
+            handler.postDelayed(autoHide, 3000);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
+            fab.hide();
+            handler.removeCallbacks(autoHide);
+        }
+    }
 
     @Override
     public void onSystemUiVisibilityChange(int visibility) {
         // if Navigation Bar appears:
         if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
             getWindow().getDecorView().setFitsSystemWindows(true);
-            onClick(digitalClock);
         } else {
             getWindow().getDecorView().setFitsSystemWindows(false);
         }
@@ -73,13 +82,9 @@ public class MainActivity extends AppCompatActivity implements View
     @Override
     public void onClick(View view) {
         if (fab.isShown()) {
-            getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
-            fab.hide();
-            handler.removeCallbacks(autoHide);
+            setFabState(false);
         } else {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            fab.show();
-            handler.postDelayed(autoHide, 3000);
+            setFabState(true);
         }
     }
 
