@@ -237,14 +237,17 @@ public class MainActivity extends AppCompatActivity implements View
     }
 
     private void updateScreenOnFlag() {
-        boolean keepScreenOn = PreferenceManager.getDefaultSharedPreferences(this).
-                getBoolean(keys.KEEP_SCREEN_ON, false);
+        String keepScreenOn = PreferenceManager.getDefaultSharedPreferences(this).
+                getString(keys.KEEP_SCREEN_ON, "ac");
 
-        if (runningOnBattery) {
-            keepScreenOn = false;
+        boolean flag = !runningOnBattery;
+        if (keepScreenOn.equals("always")) {
+            flag = true;
+        } else if (keepScreenOn.equals("never")) {
+            flag = false;
         }
 
-        if (keepScreenOn) {
+        if (flag) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

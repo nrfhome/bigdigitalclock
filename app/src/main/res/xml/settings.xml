@@ -60,11 +60,12 @@
         android:summaryOff="@string/off"
         android:summaryOn="@string/on"
         android:title="@string/title_move_clock"/>
-    <CheckBoxPreference
-        android:defaultValue="true"
+    <ListPreference
+        android:defaultValue="ac"
+        android:entries="@array/entries_keep_screen_on"
+        android:entryValues="@array/values_keep_screen_on"
         android:key="@string/key_keep_screen_on"
-        android:summaryOff="@string/no"
-        android:summaryOn="@string/yes"
+        android:summary="%s"
         android:title="@string/title_keep_screen_on"/>
     <Preference
         android:key="@string/key_info"
