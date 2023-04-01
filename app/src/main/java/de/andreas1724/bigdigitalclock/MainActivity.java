@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.BatteryManager;
 import android.os.Bundle;
@@ -19,25 +20,19 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-
 public class MainActivity extends AppCompatActivity implements View
         .OnSystemUiVisibilityChangeListener, View.OnClickListener {
 
     private DigitalClock digitalClock = null;
     private boolean isSeconds = false;
     private boolean isScreensaverMode = false;
+    private int foregroundColor, backgroundColor;
     private boolean isBleMode = false;
     private boolean hideAlarm = false;
     private Runnable bleInitialPoll;
     private FrameLayout layout;
     private FloatingActionButton fab;
     private static MyStringKeys keys;
-    private static ScheduledThreadPoolExecutor timeCountExecutor;
-    private static ScheduledFuture timer;
     private static final int FULLSCREEN_OPTIONS = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -217,21 +212,6 @@ public class MainActivity extends AppCompatActivity implements View
     }
 
     private void setColors() {
-        boolean isNightModus = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-                keys.NIGHT_MODE, false);
-        int foregroundColor, backgroundColor;
-        if (isNightModus) {
-            foregroundColor = PreferenceManager.getDefaultSharedPreferences(this).getInt
-                    (keys.FOREGROUND_COLOR_NIGHT, 0);
-            backgroundColor = PreferenceManager.getDefaultSharedPreferences(this).getInt
-                    (keys.BACKGROUND_COLOR_NIGHT, 0);
-        } else {
-            foregroundColor = PreferenceManager.getDefaultSharedPreferences(this).getInt
-                    (keys.FOREGROUND_COLOR_NORMAL, 0);
-            backgroundColor = PreferenceManager.getDefaultSharedPreferences(this).getInt
-                    (keys.BACKGROUND_COLOR_NORMAL, 0);
-        }
-
         findViewById(R.id.layout).setBackgroundColor(backgroundColor);
         digitalClock.setColors(foregroundColor);
     }
@@ -264,22 +244,28 @@ public class MainActivity extends AppCompatActivity implements View
               the text size of the actual time, they will be scaled down as well.
            3) Center the clock horizontally and vertically.
          */
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+
         updateScreenOnFlag();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
-        isSeconds = PreferenceManager.getDefaultSharedPreferences(this).
-                getBoolean(keys.SECONDS, false);
+        isSeconds = p.getBoolean(keys.SECONDS, false);
+
+        if (p.getBoolean(keys.NIGHT_MODE, false)) {
+            foregroundColor = p.getInt(keys.FOREGROUND_COLOR_NIGHT, 0);
+            backgroundColor = p.getInt(keys.BACKGROUND_COLOR_NIGHT, 0);
+        } else {
+            foregroundColor = p.getInt(keys.FOREGROUND_COLOR_NORMAL, 0);
+            backgroundColor = p.getInt(keys.BACKGROUND_COLOR_NORMAL, 0);
+        }
 
         digitalClock.showSeconds(isSeconds);
 
-        isScreensaverMode = PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(keys.MOVE_CLOCK, false);
+        isScreensaverMode = p.getBoolean(keys.MOVE_CLOCK, false);
         digitalClock.setScreensaverMode(isScreensaverMode);
 
-        hideAlarm = PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(keys.HIDE_ALARM, false);
+        hideAlarm = p.getBoolean(keys.HIDE_ALARM, false);
 
         digitalClock.init();
-        timeCountExecutor = new ScheduledThreadPoolExecutor(1);
 
         if (!isBleMode) {
             showActualTime();
@@ -334,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements View
                 showActualTime();
                 return;
             }
+            handler.postDelayed(showNextSecond, 1000);
             digitalClock.postInvalidate();
         }
     };
@@ -347,6 +334,7 @@ public class MainActivity extends AppCompatActivity implements View
                 showActualTime();
                 return;
             }
+            handler.postDelayed(showTimeNext4Seconds, 4000);
             digitalClock.postInvalidate();
         }
     };
@@ -368,21 +356,15 @@ public class MainActivity extends AppCompatActivity implements View
 
         int msec = (int) (milliseconds % 60000);
         sec = msec / 1000;
-        if (timer != null) {
-            timer.cancel(false);
-        }
         if (isSeconds) {
             int nextSec = 1000 - msec % 1000;
-            timer = timeCountExecutor.scheduleAtFixedRate(showNextSecond, nextSec, 1000,
-                    TimeUnit.MILLISECONDS);
+            handler.postDelayed(showNextSecond, nextSec);
         } else if (isScreensaverMode) {
             int next4Sec = 4000 - msec % 4000;
-            timer = timeCountExecutor.scheduleAtFixedRate(showTimeNext4Seconds, next4Sec, 4000,
-                    TimeUnit.MILLISECONDS);
+            handler.postDelayed(showTimeNext4Seconds, next4Sec);
         } else {
             int nextMin = 60000 - msec;
-            timer = timeCountExecutor.scheduleAtFixedRate(showTimeNextMinute, nextMin, 60000,
-                    TimeUnit.MILLISECONDS);
+            handler.postDelayed(showTimeNextMinute, nextMin);
         }
         digitalClock.setTime(milliseconds, isBleMode);
         digitalClock.postInvalidate();
@@ -424,7 +406,9 @@ public class MainActivity extends AppCompatActivity implements View
         unregisterBroadcastReceivers();
         handler.removeCallbacks(autoHide);
         handler.removeCallbacks(bleInitialPoll);
-        timeCountExecutor.shutdown();
+        handler.removeCallbacks(showNextSecond);
+        handler.removeCallbacks(showTimeNext4Seconds);
+        handler.removeCallbacks(showTimeNextMinute);
         super.onPause();
     }
 
@@ -432,9 +416,9 @@ public class MainActivity extends AppCompatActivity implements View
     protected void onResume() {
         super.onResume();
         setClockOrientation();
-        setColors();
         registerBroadcastReceivers();
         init();
+        setColors();
     }
 
 }
