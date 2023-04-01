@@ -29,7 +29,6 @@ public class TimeBeaconReceiverService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    private BluetoothLeScanner mBleScanner;
     private ScanCallback mScanCallback;
     private Handler mHandler;
     private Runnable mCancelCallback;
@@ -81,8 +80,14 @@ public class TimeBeaconReceiverService extends Service {
     }
 
     private void onScanResult(int callbackType, ScanResult result) {
+        Log.d(TAG, "onScanResult " + result);
+
         ScanRecord rec = result.getScanRecord();
         byte[] tsBytes = rec.getServiceData().get(SERVICE_UUID);
+        if (tsBytes == null) {
+            return;
+        }
+
         long ts = 0;
         for (int i = 7; i >= 0; i--) {
             ts <<= 8;
@@ -124,22 +129,30 @@ public class TimeBeaconReceiverService extends Service {
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
-        Log.d(TAG, "startScan");
-        mBleScanner.startScan(scanFilters, scanSettings, mScanCallback);
+        BluetoothLeScanner bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+        if (bleScanner != null) {
+            Log.d(TAG, "startScan");
+            bleScanner.startScan(null /*scanFilters*/, scanSettings, mScanCallback);
+        } else {
+            Log.e(TAG, "startScan failed: bluetooth may be disabled");
+        }
         mHandler.postDelayed(mCancelCallback, 10000);
     }
 
     @SuppressLint("MissingPermission")
     private void stopScan() {
-        Log.d(TAG, "stopScan()");
-        mBleScanner.stopScan(mScanCallback);
+        BluetoothLeScanner bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+        if (bleScanner != null) {
+            Log.d(TAG, "stopScan");
+            bleScanner.stopScan(mScanCallback);
+        } else {
+            Log.e(TAG, "stopScan failed: bluetooth may be disabled");
+        }
         mHandler.removeCallbacks(mCancelCallback);
-        this.stopSelf();
     }
 
     @Override
     public void onCreate() {
-        mBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
         mScanCallback = new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
@@ -150,6 +163,7 @@ public class TimeBeaconReceiverService extends Service {
             @Override
             public void run() {
                 TimeBeaconReceiverService.this.stopScan();
+                TimeBeaconReceiverService.this.stopSelf();
             }
         };
         mHandler = new Handler(Looper.getMainLooper());
@@ -166,8 +180,7 @@ public class TimeBeaconReceiverService extends Service {
     @SuppressLint("MissingPermission")
     @Override
     public void onDestroy() {
-        mBleScanner.stopScan(mScanCallback);
-        mHandler.removeCallbacks(mCancelCallback);
+        stopScan();
     }
 
     public class LocalBinder extends Binder {
