@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,10 +43,13 @@ class TimeTool {
         return String.format("%7s", simpleDateFormat.format(new Date(milliseconds)));
     }
 
-    static String getShortTime(long milliseconds, boolean is24HourFormat) {
+    static String getShortTime(long milliseconds, boolean is24HourFormat, boolean isUtc) {
         SimpleDateFormat simpleDateFormat = is24HourFormat?
                 new SimpleDateFormat("H:mma", Locale.US):
                 new SimpleDateFormat("h:mma", Locale.US);
+        if (isUtc) {
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
         return String.format("%7s", simpleDateFormat.format(new Date(milliseconds)));
     }
 

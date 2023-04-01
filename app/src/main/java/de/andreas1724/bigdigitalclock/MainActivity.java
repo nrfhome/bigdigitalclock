@@ -1,5 +1,6 @@
 package de.andreas1724.bigdigitalclock;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
@@ -12,6 +13,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -27,6 +29,8 @@ public class MainActivity extends AppCompatActivity implements View
     private DigitalClock digitalClock = null;
     private boolean isSeconds = false;
     private boolean isScreensaverMode = false;
+    private boolean isBleMode = false;
+    private Runnable bleInitialPoll;
     private FrameLayout layout;
     private FloatingActionButton fab;
     private static MyStringKeys keys;
@@ -43,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements View
     private ClockReceiver receiver = null;
 
     public static String[] actionsForReceiver;
+
+    private final String TAG = "BigDigitalClock";
 
     public static final String[] ACTIONS_LOLLIPOP = {
             Intent.ACTION_TIME_CHANGED,
@@ -233,10 +239,31 @@ public class MainActivity extends AppCompatActivity implements View
         isScreensaverMode = PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(keys.MOVE_CLOCK, false);
         digitalClock.setScreensaverMode(isScreensaverMode);
+
         digitalClock.init();
         timeCountExecutor = new ScheduledThreadPoolExecutor(1);
 
-        showActualTime();
+        if (!isBleMode) {
+            showActualTime();
+        } else {
+            digitalClock.setTime(0, false);
+            digitalClock.postInvalidate();
+
+            bleInitialPoll = new Runnable() {
+                @Override
+                public void run() {
+                    if (TimeBeaconReceiverService.isRecentUpdateAvailable()) {
+                        showActualTime();
+                    } else {
+                        TimeBeaconReceiverService.maybeResync(MainActivity.this);
+                        handler.postDelayed(bleInitialPoll, 250);
+                    }
+                }
+            };
+            TimeBeaconReceiverService.forceInitialScan(this);
+            handler.postDelayed(bleInitialPoll, 250);
+        }
+
         showNextAlarm();
         getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
     }
@@ -287,7 +314,14 @@ public class MainActivity extends AppCompatActivity implements View
     };
 
     private void showActualTime() {
-        final long milliseconds = System.currentTimeMillis();
+        final long milliseconds;
+        if (isBleMode) {
+            milliseconds = TimeBeaconReceiverService.currentTimeMillis();
+            TimeBeaconReceiverService.maybeResync(this);
+        } else {
+            milliseconds = System.currentTimeMillis();
+        }
+
         int msec = (int) (milliseconds % 60000);
         sec = msec / 1000;
         if (timer != null) {
@@ -306,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements View
             timer = timeCountExecutor.scheduleAtFixedRate(showTimeNextMinute, nextMin, 60000,
                     TimeUnit.MILLISECONDS);
         }
-        digitalClock.setTime(milliseconds);
+        digitalClock.setTime(milliseconds, isBleMode);
         digitalClock.postInvalidate();
     }
 
@@ -318,6 +352,19 @@ public class MainActivity extends AppCompatActivity implements View
             alarmMilliseconds = -1;
         }
         digitalClock.setAlarm(alarmMilliseconds);
+    }
+
+    protected void onStart() {
+        super.onStart();
+
+        isBleMode = PreferenceManager.getDefaultSharedPreferences(this).
+                getBoolean(keys.BLE, false);
+
+        if (isBleMode) {
+            String[] permissionList = { Manifest.permission.BLUETOOTH,
+                    Manifest.permission.ACCESS_FINE_LOCATION };
+            requestPermissions(permissionList, 0);
+        }
     }
 
     @Override

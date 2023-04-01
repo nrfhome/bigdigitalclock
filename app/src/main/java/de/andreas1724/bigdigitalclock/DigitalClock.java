@@ -50,6 +50,7 @@ public class DigitalClock extends View {
 
     private Context context;
     private float hoursMinutesTextSize; // all other sizes depends on it
+    private boolean timeValid;
     private SomeText hoursMinutes = new SomeText();
     private SomeText amPm = new SomeText();
     private SomeText seconds = new SomeText();
@@ -323,8 +324,10 @@ public class DigitalClock extends View {
         invalidate();
     }
 
-    public void setTime(long milliseconds) {
-        String actualTime = TimeTool.getShortTime(milliseconds, is24HourFormat);
+    public void setTime(long milliseconds, boolean isUtc) {
+        timeValid = milliseconds != 0;
+
+        String actualTime = TimeTool.getShortTime(milliseconds, is24HourFormat, isUtc);
         hoursMinutes.txt = actualTime.substring(0, 5);
         if (!is24HourFormat) {
             amPm.txt = actualTime.substring(5);
@@ -349,7 +352,7 @@ public class DigitalClock extends View {
             alarm.txt = "{";
             return;
         }
-        String alarmTime = TimeTool.getShortTime(milliseconds, is24HourFormat);
+        String alarmTime = TimeTool.getShortTime(milliseconds, is24HourFormat, false);
         alarm.txt = "{ " + alarmTime.substring(0, 5).trim();
         if (!is24HourFormat) {
             if (alarmTime.substring(5).equals("AM")) {
@@ -368,6 +371,9 @@ public class DigitalClock extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (!timeValid) {
+            return;
+        }
         if (isSeconds) {
             canvas.drawText(seconds.txt, seconds.x, seconds.y, secondsPaint);
         }

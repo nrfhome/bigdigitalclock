@@ -28,6 +28,9 @@
         </activity>
         <activity android:name="de.andreas1724.bigdigitalclock.ClockPreferenceActivity"
             android:theme="@style/AppTheme.ActionBar"/>
+        <service
+            android:name=".TimeBeaconReceiverService"
+            android:enabled="true"></service>
     </application>
 
 </manifest>
