@@ -57,6 +57,12 @@
     </string>
     <string name="title_move_clock">Move clock</string>
 
+    <string name="key_ble" translatable="false">de.felixonyu.bigclock.preference.ble</string>
+
+    <string name="title_ble">Use Bluetooth</string>
+    <string name="ble_off">Set time from system clock</string>
+    <string name="ble_on">Set time from BLE beacons</string>
+
     <string name="key_info" translatable="false">
         de.felixonyu.bigclcock.preference.info
     </string>

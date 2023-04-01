@@ -16,6 +16,7 @@ class MyStringKeys {
     final String SECONDS;
     final String KEEP_SCREEN_ON;
     final String MOVE_CLOCK;
+    final String BLE;
     final String INFO;
 
     private static MyStringKeys keys = null;
@@ -35,6 +36,7 @@ class MyStringKeys {
         SECONDS = context.getResources().getString(R.string.key_seconds);
         KEEP_SCREEN_ON = context.getResources().getString(R.string.key_keep_screen_on);
         MOVE_CLOCK = context.getResources().getString(R.string.key_move_clock);
+        BLE = "de.felixonyu.bigclock.preference.ble";
         INFO = context.getResources().getString(R.string.key_info);
     }
 

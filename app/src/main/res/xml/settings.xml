@@ -44,6 +44,12 @@
         android:title="@string/title_seconds"/>
     <CheckBoxPreference
         android:defaultValue="false"
+        android:key="@string/key_ble"
+        android:summaryOff="@string/ble_off"
+        android:summaryOn="@string/ble_on"
+        android:title="@string/title_ble"/>
+    <CheckBoxPreference
+        android:defaultValue="false"
         android:key="@string/key_move_clock"
         android:summaryOff="@string/off"
         android:summaryOn="@string/on"

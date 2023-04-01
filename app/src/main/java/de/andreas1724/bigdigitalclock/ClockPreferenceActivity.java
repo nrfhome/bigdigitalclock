@@ -1,5 +1,6 @@
 package de.andreas1724.bigdigitalclock;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,6 +24,8 @@ public class ClockPreferenceActivity extends PreferenceActivity
     private ColorPickerPreference foregroundNight;
     private ColorPickerPreference backgroundNormal;
     private ColorPickerPreference backgroundNight;
+
+    private final String TAG = "BigDigitalClock";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +134,13 @@ public class ClockPreferenceActivity extends PreferenceActivity
                 getPreferenceScreen().
                         removePreference(foregroundNight);
                 setNormalColorSummaries();
+            }
+        } else if (key.equals(keys.BLE)) {
+            boolean enabled = sharedPreferences.getBoolean(keys.BLE, false);
+            if (enabled) {
+                String[] permissionList = { Manifest.permission.BLUETOOTH,
+                        Manifest.permission.ACCESS_FINE_LOCATION };
+                requestPermissions(permissionList, 0);
             }
         }
     }
