@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -45,7 +46,10 @@ public class MainActivity extends AppCompatActivity implements View
                 //| View.SYSTEM_UI_FLAG_FULLSCREEN
             ;
 
-    private ClockReceiver receiver = null;
+    private ClockReceiver clockReceiver = null;
+
+    private boolean runningOnBattery = false;
+    private BroadcastReceiver batteryReceiver;
 
     public static String[] actionsForReceiver;
 
@@ -161,21 +165,40 @@ public class MainActivity extends AppCompatActivity implements View
     }
 
 
-    private void registerClockReceiver() {
-        if (receiver == null) {
-            receiver = new ClockReceiver();
+    private void registerBroadcastReceivers() {
+        if (clockReceiver == null) {
+            clockReceiver = new ClockReceiver();
         }
         for (String action: actionsForReceiver) {
             IntentFilter filter = new IntentFilter(action);
-            registerReceiver(receiver, filter);
+            registerReceiver(clockReceiver, filter);
+        }
+
+        if (batteryReceiver == null) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            batteryReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+                    runningOnBattery = plugged == 0;
+                    Log.d(TAG, "Running on battery: " + runningOnBattery);
+                    updateScreenOnFlag();
+                }
+            };
+            registerReceiver(batteryReceiver, filter);
         }
     }
 
-    private void unregisterClockReceiver() {
-        if (receiver != null) {
-            unregisterReceiver(receiver);
+    private void unregisterBroadcastReceivers() {
+        if (clockReceiver != null) {
+            unregisterReceiver(clockReceiver);
         }
-        receiver = null;
+        clockReceiver = null;
+
+        if (batteryReceiver != null) {
+            unregisterReceiver(batteryReceiver);
+        }
+        batteryReceiver = null;
     }
 
     private void setClockOrientation() {
@@ -213,6 +236,20 @@ public class MainActivity extends AppCompatActivity implements View
         digitalClock.setColors(foregroundColor);
     }
 
+    private void updateScreenOnFlag() {
+        boolean keepScreenOn = PreferenceManager.getDefaultSharedPreferences(this).
+                getBoolean(keys.KEEP_SCREEN_ON, false);
+
+        if (runningOnBattery) {
+            keepScreenOn = false;
+        }
+
+        if (keepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
 
     private void init() {
         /*
@@ -224,13 +261,7 @@ public class MainActivity extends AppCompatActivity implements View
               the text size of the actual time, they will be scaled down as well.
            3) Center the clock horizontally and vertically.
          */
-        boolean keepScreenOn = PreferenceManager.getDefaultSharedPreferences(this).
-                getBoolean(keys.KEEP_SCREEN_ON, false);
-        if (keepScreenOn) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        } else {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
+        updateScreenOnFlag();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         isSeconds = PreferenceManager.getDefaultSharedPreferences(this).
                 getBoolean(keys.SECONDS, false);
@@ -380,14 +411,14 @@ public class MainActivity extends AppCompatActivity implements View
     @Override
     protected void onDestroy() {
         layout.removeAllViews();
-        unregisterClockReceiver();
+        unregisterBroadcastReceivers();
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
         fab.hide();
-        unregisterClockReceiver();
+        unregisterBroadcastReceivers();
         handler.removeCallbacks(autoHide);
         handler.removeCallbacks(bleInitialPoll);
         timeCountExecutor.shutdown();
@@ -399,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements View
         super.onResume();
         setClockOrientation();
         setColors();
-        registerClockReceiver();
+        registerBroadcastReceivers();
         init();
     }
 
