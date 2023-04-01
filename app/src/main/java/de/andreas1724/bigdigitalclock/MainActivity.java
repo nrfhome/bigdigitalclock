@@ -385,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements View
         fab.hide();
         unregisterClockReceiver();
         handler.removeCallbacks(autoHide);
+        handler.removeCallbacks(bleInitialPoll);
         timeCountExecutor.shutdown();
         super.onPause();
     }
