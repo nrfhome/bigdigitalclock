@@ -34,7 +34,9 @@ public class TimeBeaconReceiverService extends Service {
     private Runnable mCancelCallback;
 
     private static final ParcelUuid SERVICE_UUID =
-            new ParcelUuid(UUID.fromString("e043ea26-928a-2ffb-6117-f98bb98e036c"));
+            new ParcelUuid(UUID.fromString("e043ea26-928a-2ffb-0000-000000000000"));
+    private static final ParcelUuid SERVICE_UUID_MASK =
+            new ParcelUuid(UUID.fromString("ffffffff-ffff-ffff-0000-000000000000"));
 
     private static long lastRxRealtime = 0;
     private static long lastRxTimestamp;
@@ -83,17 +85,19 @@ public class TimeBeaconReceiverService extends Service {
         Log.d(TAG, "onScanResult " + result);
 
         ScanRecord rec = result.getScanRecord();
-        byte[] tsBytes = rec.getServiceData().get(SERVICE_UUID);
-        if (tsBytes == null) {
+        List<ParcelUuid> uuids = rec.getServiceUuids();
+        if (uuids == null) {
             return;
         }
-
-        long ts = 0;
-        for (int i = 7; i >= 0; i--) {
-            ts <<= 8;
-            ts |= ((int)tsBytes[i] & 0xff);
+        ParcelUuid uuid = rec.getServiceUuids().get(0);
+        if (uuid == null) {
+            return;
         }
-        Log.d(TAG, "onScanResult " + ts + " <- " + result);
+        // Only needed if filtering is broken
+        if (uuid.getUuid().getMostSignificantBits() != SERVICE_UUID.getUuid().getMostSignificantBits()) {
+            return;
+        }
+        long ts = uuid.getUuid().getLeastSignificantBits();
 
         synchronized (mLock) {
             lastRxTimestamp = ts;
@@ -117,12 +121,12 @@ public class TimeBeaconReceiverService extends Service {
         }
 
         // Filter for the SERVICE_UUID, match on any payload bytes
-        byte[] zeroes = { 0 };
         ScanFilter scanFilter0 = new ScanFilter.Builder()
-                .setServiceData(SERVICE_UUID, zeroes, zeroes)
+                .setServiceUuid(SERVICE_UUID, SERVICE_UUID_MASK)
                 .build();
         List<ScanFilter> scanFilters = new ArrayList<>();
-        scanFilters.add(scanFilter0);
+        // Broken on: Nexus 5, Nexus 7 (6.0.1)
+        //scanFilters.add(scanFilter0);
 
         // Optimize for low latency to minimize skew
         ScanSettings scanSettings = new ScanSettings.Builder()
@@ -132,7 +136,7 @@ public class TimeBeaconReceiverService extends Service {
         BluetoothLeScanner bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
         if (bleScanner != null) {
             Log.d(TAG, "startScan");
-            bleScanner.startScan(null /*scanFilters*/, scanSettings, mScanCallback);
+            bleScanner.startScan(scanFilters, scanSettings, mScanCallback);
         } else {
             Log.e(TAG, "startScan failed: bluetooth may be disabled");
         }
