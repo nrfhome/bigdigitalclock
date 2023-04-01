@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View
     private boolean isSeconds = false;
     private boolean isScreensaverMode = false;
     private boolean isBleMode = false;
+    private boolean hideAlarm = false;
     private Runnable bleInitialPoll;
     private FrameLayout layout;
     private FloatingActionButton fab;
@@ -240,6 +241,9 @@ public class MainActivity extends AppCompatActivity implements View
                 .getBoolean(keys.MOVE_CLOCK, false);
         digitalClock.setScreensaverMode(isScreensaverMode);
 
+        hideAlarm = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(keys.HIDE_ALARM, false);
+
         digitalClock.init();
         timeCountExecutor = new ScheduledThreadPoolExecutor(1);
 
@@ -357,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements View
         } catch (Exception e) {
             alarmMilliseconds = -1;
         }
-        digitalClock.setAlarm(alarmMilliseconds);
+        digitalClock.setAlarm(alarmMilliseconds, hideAlarm);
     }
 
     protected void onStart() {

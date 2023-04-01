@@ -344,9 +344,13 @@ public class DigitalClock extends View {
         seconds.txt = String.format(Locale.US, "%02d", sec);
     }
 
-    public void setAlarm(long milliseconds) {
+    public void setAlarm(long milliseconds, boolean hideAlarm) {
         if (milliseconds == 0) {
-            alarm.txt = "}";
+            if (hideAlarm) {
+                alarm.txt = "";
+            } else {
+                alarm.txt = "}";
+            }
             return;
         } else if (milliseconds < 0) {
             alarm.txt = "{";

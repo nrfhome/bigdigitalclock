@@ -44,6 +44,12 @@
         android:title="@string/title_seconds"/>
     <CheckBoxPreference
         android:defaultValue="false"
+        android:key="@string/key_hide_alarm"
+        android:summaryOff="@string/off"
+        android:summaryOn="@string/on"
+        android:title="@string/title_hide_alarm"/>
+    <CheckBoxPreference
+        android:defaultValue="false"
         android:key="@string/key_ble"
         android:summaryOff="@string/ble_off"
         android:summaryOn="@string/ble_on"
