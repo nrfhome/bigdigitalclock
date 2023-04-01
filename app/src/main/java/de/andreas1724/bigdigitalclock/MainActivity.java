@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -45,17 +44,6 @@ public class MainActivity extends AppCompatActivity implements View
 
     public static String[] actionsForReceiver;
 
-    public static final String[] ACTIONS_BEFORE_LOLLIPOP = {
-            Intent.ACTION_TIME_CHANGED,
-            "com.android.deskclock.ALARM_ALERT",
-            "com.samsung.sec.android.clockpackage.alarm.ALARM_ALERT",
-            "com.lge.clock.ALARM_ALERT",
-            "com.htc.android.worldclock.ALARM_ALERT",
-            "com.sonyericsson.alarm.ALARM_ALERT",
-            "zte.com.cn.alarmclock.ALARM_ALERT",
-            "com.motorola.blur.alarmclock.ALARM_ALERT"
-    };
-
     public static final String[] ACTIONS_LOLLIPOP = {
             Intent.ACTION_TIME_CHANGED,
             AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED
@@ -73,29 +61,23 @@ public class MainActivity extends AppCompatActivity implements View
 
     @Override
     public void onSystemUiVisibilityChange(int visibility) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            // if Navigation Bar appears:
-            if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
-                getWindow().getDecorView().setFitsSystemWindows(true);
-                onClick(digitalClock);
-            } else {
-                getWindow().getDecorView().setFitsSystemWindows(false);
-            }
+        // if Navigation Bar appears:
+        if ((visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+            getWindow().getDecorView().setFitsSystemWindows(true);
+            onClick(digitalClock);
+        } else {
+            getWindow().getDecorView().setFitsSystemWindows(false);
         }
     }
 
     @Override
     public void onClick(View view) {
         if (fab.isShown()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
-            }
+            getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
             fab.hide();
             handler.removeCallbacks(autoHide);
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             fab.show();
             handler.postDelayed(autoHide, 3000);
         }
@@ -137,11 +119,7 @@ public class MainActivity extends AppCompatActivity implements View
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
         digitalClock.setOnClickListener(this);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            actionsForReceiver = ACTIONS_LOLLIPOP;
-        } else {
-            actionsForReceiver = ACTIONS_BEFORE_LOLLIPOP;
-        }
+        actionsForReceiver = ACTIONS_LOLLIPOP;
 
         // To prevent "Font size too large to fit in cache". Switch off hardware acceleration:
         digitalClock.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -151,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && hasFocus) {
+        if (hasFocus) {
             getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
         }
     }
@@ -255,9 +233,7 @@ public class MainActivity extends AppCompatActivity implements View
 
         showActualTime();
         showNextAlarm();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
-        }
+        getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
     }
 
     private Runnable showTimeNextMinute = new Runnable() {

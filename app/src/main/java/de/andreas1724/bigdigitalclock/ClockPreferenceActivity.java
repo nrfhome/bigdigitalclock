@@ -58,12 +58,7 @@ public class ClockPreferenceActivity extends PreferenceActivity
 
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent i;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    i = new Intent(AlarmClock.ACTION_SHOW_ALARMS);
-                } else {
-                    i = new Intent(AlarmClock.ACTION_SET_ALARM);
-                }
+                Intent i = new Intent(AlarmClock.ACTION_SHOW_ALARMS);
                 try {
                     startActivity(i);
                 } catch (ActivityNotFoundException e) {

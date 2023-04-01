@@ -20,32 +20,13 @@ class TimeTool {
     // unreadable alarm => return -1
     // alarm fetched => return alarm time in milliseconds
     static long getNextAlarmMilliseconds(Context context) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            AlarmManager.AlarmClockInfo info =
-                    ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
-                            .getNextAlarmClock();
-            if (info == null) {
-                return 0;
-            }
-            return info.getTriggerTime();
-        }
-        String nextAlarm = Settings.System.getString(context.getContentResolver(), Settings.System
-                .NEXT_ALARM_FORMATTED);
-        if (nextAlarm == null || nextAlarm.length() == 0) {
+        AlarmManager.AlarmClockInfo info =
+                ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE))
+                        .getNextAlarmClock();
+        if (info == null) {
             return 0;
         }
-        String[] weekdays = DateFormatSymbols.getInstance().getShortWeekdays();
-
-        String[] amPm = DateFormatSymbols.getInstance().getAmPmStrings();
-
-        long milliseconds;
-        try {
-            milliseconds = getNextAlarm(nextAlarm, weekdays, amPm, context);
-        } catch (Exception e) {
-            Log.e("TimeTool.java", e.getMessage());
-            return -1;
-        }
-        return milliseconds;
+        return info.getTriggerTime();
     }
 
     /**
