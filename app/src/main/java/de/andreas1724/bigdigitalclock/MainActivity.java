@@ -388,7 +388,8 @@ public class MainActivity extends AppCompatActivity implements View
 
         if (isBleMode) {
             String[] permissionList = { Manifest.permission.BLUETOOTH,
-                    Manifest.permission.ACCESS_FINE_LOCATION };
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION };
             requestPermissions(permissionList, 0);
         }
     }

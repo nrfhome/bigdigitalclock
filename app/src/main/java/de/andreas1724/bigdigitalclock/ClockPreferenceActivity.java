@@ -139,7 +139,8 @@ public class ClockPreferenceActivity extends PreferenceActivity
             boolean enabled = sharedPreferences.getBoolean(keys.BLE, false);
             if (enabled) {
                 String[] permissionList = { Manifest.permission.BLUETOOTH,
-                        Manifest.permission.ACCESS_FINE_LOCATION };
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION };
                 requestPermissions(permissionList, 0);
             }
         }
