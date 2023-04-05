@@ -26,8 +26,10 @@ public class MainActivity extends AppCompatActivity implements View
     private DigitalClock digitalClock = null;
     private boolean isSeconds = false;
     private boolean isScreensaverMode = false;
+    private long nextStepTime;
     private int foregroundColor, backgroundColor;
     private boolean isBleMode = false;
+    private boolean errorColor = false;
     private boolean hideAlarm = false;
     private Runnable bleInitialPoll;
     private FrameLayout layout;
@@ -277,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements View
                 @Override
                 public void run() {
                     if (TimeBeaconReceiverService.isRecentUpdateAvailable()) {
+                        errorColor = false;
                         showActualTime();
                     } else {
                         TimeBeaconReceiverService.maybeResync(MainActivity.this);
@@ -292,50 +295,10 @@ public class MainActivity extends AppCompatActivity implements View
         getWindow().getDecorView().setSystemUiVisibility(FULLSCREEN_OPTIONS);
     }
 
-    private Runnable showTimeNextMinute = new Runnable() {
+    private Runnable runShowActualTime = new Runnable() {
         @Override
         public void run() {
             showActualTime();
-        }
-    };
-
-    private volatile int sec;
-
-    private void addSeconds(int numberOfSeconds) {
-        sec += numberOfSeconds;
-        if (sec > 59) {
-            sec = 60 % numberOfSeconds;
-        }
-    }
-
-    private Runnable showNextSecond = new Runnable() {
-        @Override
-        public void run() {
-            addSeconds(1);
-            digitalClock.setSeconds(sec);
-            if (isScreensaverMode && sec % 4 == 0) {
-                digitalClock.moveOneStep();
-            }
-            if (sec == 0) {
-                showActualTime();
-                return;
-            }
-            handler.postDelayed(showNextSecond, 1000);
-            digitalClock.postInvalidate();
-        }
-    };
-
-    private Runnable showTimeNext4Seconds = new Runnable() {
-        @Override
-        public void run() {
-            digitalClock.moveOneStep();
-            addSeconds(4);
-            if (sec == 0) {
-                showActualTime();
-                return;
-            }
-            handler.postDelayed(showTimeNext4Seconds, 4000);
-            digitalClock.postInvalidate();
         }
     };
 
@@ -345,28 +308,36 @@ public class MainActivity extends AppCompatActivity implements View
             milliseconds = TimeBeaconReceiverService.currentTimeMillis();
             TimeBeaconReceiverService.maybeResync(this);
             if (TimeBeaconReceiverService.isRecentUpdateAvailable()) {
-                setColors();
+                if (errorColor) {
+                    setColors();
+                    errorColor = false;
+                }
             } else {
-                // Turn the clock red if we can't receive beacons anymore
-                digitalClock.setColors(0xffff0000);
+                if (!errorColor) {
+                    // Turn the clock red if we can't receive beacons anymore
+                    digitalClock.setColors(0xffff0000);
+                    errorColor = true;
+                }
             }
         } else {
             milliseconds = System.currentTimeMillis();
         }
 
-        int msec = (int) (milliseconds % 60000);
-        sec = msec / 1000;
+        int msec = (int) (milliseconds % 60000), nextRefresh;
         if (isSeconds) {
-            int nextSec = 1000 - msec % 1000;
-            handler.postDelayed(showNextSecond, nextSec);
+            nextRefresh = 1000 - msec % 1000;
         } else if (isScreensaverMode) {
-            int next4Sec = 4000 - msec % 4000;
-            handler.postDelayed(showTimeNext4Seconds, next4Sec);
+            nextRefresh = 4000 - msec % 4000;
         } else {
-            int nextMin = 60000 - msec;
-            handler.postDelayed(showTimeNextMinute, nextMin);
+            nextRefresh = 60000 - msec;
         }
+        handler.postDelayed(runShowActualTime, nextRefresh);
+
         digitalClock.setTime(milliseconds, isBleMode);
+        if (isScreensaverMode && milliseconds > nextStepTime) {
+            digitalClock.moveOneStep();
+            nextStepTime = milliseconds + 4000;
+        }
         digitalClock.postInvalidate();
     }
 
@@ -407,9 +378,8 @@ public class MainActivity extends AppCompatActivity implements View
         unregisterBroadcastReceivers();
         handler.removeCallbacks(autoHide);
         handler.removeCallbacks(bleInitialPoll);
-        handler.removeCallbacks(showNextSecond);
-        handler.removeCallbacks(showTimeNext4Seconds);
-        handler.removeCallbacks(showTimeNextMinute);
+        handler.removeCallbacks(runShowActualTime);
+
         super.onPause();
     }
 
