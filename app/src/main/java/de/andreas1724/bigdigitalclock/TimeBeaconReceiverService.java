@@ -41,6 +41,7 @@ public class TimeBeaconReceiverService extends Service {
     private static long lastRxRealtime = 0;
     private static long lastRxTimestamp;
     private static long lastResyncAttempt = 0;
+    private static long rxCountSinceSync = 0;
     private static Object mLock;
 
     private static final String TAG = "BigDigitalClock";
@@ -81,10 +82,17 @@ public class TimeBeaconReceiverService extends Service {
         }
     }
 
+    public static long getRxCountSinceSync() {
+        synchronized (mLock) {
+            return rxCountSinceSync;
+        }
+    }
+
     private void onScanResult(int callbackType, ScanResult result) {
         Log.d(TAG, "onScanResult " + result);
 
         ScanRecord rec = result.getScanRecord();
+        rxCountSinceSync++;
         List<ParcelUuid> uuids = rec.getServiceUuids();
         if (uuids == null) {
             return;
@@ -102,6 +110,7 @@ public class TimeBeaconReceiverService extends Service {
         synchronized (mLock) {
             lastRxTimestamp = ts;
             lastRxRealtime = result.getTimestampNanos() / 1000000;
+            rxCountSinceSync = 0;
         }
         stopScan();
     }

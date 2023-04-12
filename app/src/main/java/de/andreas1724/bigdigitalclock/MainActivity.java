@@ -282,13 +282,16 @@ public class MainActivity extends AppCompatActivity implements View
                         errorColor = false;
                         showActualTime();
                     } else {
+                        digitalClock.setRxCount(TimeBeaconReceiverService.getRxCountSinceSync());
+                        digitalClock.postInvalidate();
+
                         TimeBeaconReceiverService.maybeResync(MainActivity.this);
                         handler.postDelayed(bleInitialPoll, 250);
                     }
                 }
             };
             TimeBeaconReceiverService.forceInitialScan(this);
-            handler.postDelayed(bleInitialPoll, 250);
+            handler.postDelayed(bleInitialPoll, 1000);
         }
 
         showNextAlarm();

@@ -21,6 +21,7 @@ public class DigitalClock extends View {
     private static final float GAP_TIME_RATIO = 0.05f;
     private static final float SECONDS_TIME_RATIO =
             (float) ((3 - Math.sqrt(5)) / 2); // golden ratio ;-)
+    private static final float SYNC_RATIO = 0.2f;
     private static final String FONT = "segments.ttf";
     /*
     In this font:
@@ -55,12 +56,14 @@ public class DigitalClock extends View {
     private SomeText amPm = new SomeText();
     private SomeText seconds = new SomeText();
     private SomeText alarm = new SomeText();
+    private SomeText sync = new SomeText();
     private boolean is24HourFormat;
     private boolean isSeconds = false;
     private Paint hoursMinutesPaint;
     private Paint amPmPaint;
     private Paint secondsPaint;
     private Paint alarmPaint;
+    private Paint syncPaint;
     private int canvasWidth, canvasHeight;
     private Rect boundingRect = new Rect();
     private boolean isScreensaverMode = true;
@@ -83,6 +86,10 @@ public class DigitalClock extends View {
         amPmPaint = new Paint(hoursMinutesPaint);
         secondsPaint = new Paint(hoursMinutesPaint);
         alarmPaint = new Paint(hoursMinutesPaint);
+
+        syncPaint = new Paint();
+        syncPaint.setTypeface(Typeface.MONOSPACE);
+        syncPaint.setTextAlign(Paint.Align.LEFT);
     }
 
     @Override
@@ -244,6 +251,8 @@ public class DigitalClock extends View {
         amPmPaint.getTextBounds(LARGEST_AMPM, 0, LARGEST_AMPM.length(), r);
         amPm.x = boundingRect.right - r.width() - r.left;
         amPm.y = boundingRect.bottom - r.bottom;
+        sync.x = boundingRect.left;
+        sync.y = hoursMinutes.y;
     }
 
     private void calculateBoundingRect() {
@@ -301,6 +310,7 @@ public class DigitalClock extends View {
         alarmPaint.setTextSize(textSize * ALARM_TIME_RATIO);
         amPmPaint.setTextSize(textSize * AMPM_TIME_RATIO);
         secondsPaint.setTextSize(textSize * SECONDS_TIME_RATIO);
+        syncPaint.setTextSize(textSize * SYNC_RATIO);
     }
 
     private float getWidestPossibleTextSize() {
@@ -321,6 +331,7 @@ public class DigitalClock extends View {
         amPmPaint.setColor(color);
         secondsPaint.setColor(color);
         alarmPaint.setColor(color);
+        syncPaint.setColor(color);
         invalidate();
     }
 
@@ -373,9 +384,14 @@ public class DigitalClock extends View {
         invalidate();
     }
 
+    public void setRxCount(long rxCount) {
+        sync.txt = String.format("SYNC %04d", new Long(rxCount % 10000));
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (!timeValid) {
+            canvas.drawText(sync.txt, sync.x, sync.y, syncPaint);
             return;
         }
         if (isSeconds) {
