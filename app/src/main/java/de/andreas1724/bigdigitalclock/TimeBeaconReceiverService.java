@@ -60,6 +60,9 @@ public class TimeBeaconReceiverService extends Service {
 
     public static boolean isRecentUpdateAvailable() {
         synchronized (mLock) {
+            if (lastRxRealtime == 0) {
+                return false;
+            }
             return timeSinceLastUpdate() <= (3 * 60 * 60 * 1000);
         }
     }
