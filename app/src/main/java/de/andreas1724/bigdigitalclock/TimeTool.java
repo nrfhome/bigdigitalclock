@@ -52,6 +52,15 @@ class TimeTool {
         }
         return String.format("%7s", simpleDateFormat.format(new Date(milliseconds)));
     }
+    static String getShortDate(long milliseconds, boolean isUtc) {
+        // FIXME: This should check the locale since many countries use "d-M"
+        SimpleDateFormat simpleDateFormat =
+                new SimpleDateFormat("EEE M-d", Locale.getDefault());
+        if (isUtc) {
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        }
+        return simpleDateFormat.format(new Date(milliseconds));
+    }
 
     static String getNextAlarmAndDays(Context context) {
         long alarmMilliseconds = getNextAlarmMilliseconds(context);

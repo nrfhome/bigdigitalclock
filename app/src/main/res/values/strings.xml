@@ -63,8 +63,11 @@
     <string name="ble_off">Set time from system clock</string>
     <string name="ble_on">Set time from BLE beacons</string>
 
-    <string name="key_hide_alarm" translatable="false">de.felixonyu.bigclock.preference.hide_alarm</string>
-    <string name="title_hide_alarm">Hide alarm icon if disabled</string>
+    <string name="key_second_row" translatable="false">de.felixonyu.bigclock.preference.second_row</string>
+    <string name="title_second_row">Second row contents</string>
+
+    <string name="key_24h" translatable="false">de.felixonyu.bigclock.preference.24h</string>
+    <string name="title_24h">24-hour time</string>
 
     <string name="key_info" translatable="false">
         de.felixonyu.bigclcock.preference.info

@@ -24,4 +24,16 @@
         <item>always</item>
         <item>never</item>
     </string-array>
+    <string-array name="entries_second_row">
+        <item>AM/PM and alarm</item>
+        <item>AM/PM only</item>
+        <item>Weekday and date</item>
+        <item>Disabled</item>
+    </string-array>
+    <string-array name="values_second_row" translatable="false">
+        <item>ampm_alarm</item>
+        <item>ampm</item>
+        <item>date</item>
+        <item>disabled</item>
+    </string-array>
 </resources>

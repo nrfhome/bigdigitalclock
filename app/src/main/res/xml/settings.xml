@@ -44,10 +44,10 @@
         android:title="@string/title_seconds"/>
     <CheckBoxPreference
         android:defaultValue="false"
-        android:key="@string/key_hide_alarm"
+        android:key="@string/key_24h"
         android:summaryOff="@string/off"
         android:summaryOn="@string/on"
-        android:title="@string/title_hide_alarm"/>
+        android:title="@string/title_24h"/>
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="@string/key_ble"
@@ -60,6 +60,13 @@
         android:summaryOff="@string/off"
         android:summaryOn="@string/on"
         android:title="@string/title_move_clock"/>
+    <ListPreference
+        android:defaultValue="ampm_alarm"
+        android:entries="@array/entries_second_row"
+        android:entryValues="@array/values_second_row"
+        android:key="@string/key_second_row"
+        android:summary="%s"
+        android:title="@string/title_second_row"/>
     <ListPreference
         android:defaultValue="ac"
         android:entries="@array/entries_keep_screen_on"

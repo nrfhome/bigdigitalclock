@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements View
     private int foregroundColor, backgroundColor;
     private boolean isBleMode = false;
     private boolean errorColor = false;
-    private boolean hideAlarm = false;
     private Runnable bleInitialPoll;
     private FrameLayout layout;
     private FloatingActionButton fab;
@@ -265,9 +264,17 @@ public class MainActivity extends AppCompatActivity implements View
         isScreensaverMode = p.getBoolean(keys.MOVE_CLOCK, false);
         digitalClock.setScreensaverMode(isScreensaverMode);
 
-        hideAlarm = p.getBoolean(keys.HIDE_ALARM, false);
-
-        digitalClock.init();
+        boolean is24HourFormat = p.getBoolean(keys.USE_24H, false);
+        String secondRowMode = p.getString(keys.SECOND_ROW, "ampm_alarm");
+        int secondRowModeInt = DigitalClock.SECOND_ROW_AMPM_ALARM;
+        if (secondRowMode.equals("ampm")) {
+            secondRowModeInt = DigitalClock.SECOND_ROW_AMPM;
+        } else if (secondRowMode.equals("date")) {
+            secondRowModeInt = DigitalClock.SECOND_ROW_DATE;
+        } else if (secondRowMode.equals("disabled")) {
+            secondRowModeInt = DigitalClock.SECOND_ROW_OFF;
+        }
+        digitalClock.init(is24HourFormat, secondRowModeInt);
 
         if (!isBleMode) {
             showActualTime();
@@ -351,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements View
         } catch (Exception e) {
             alarmMilliseconds = -1;
         }
-        digitalClock.setAlarm(alarmMilliseconds, hideAlarm);
+        digitalClock.setAlarm(alarmMilliseconds);
     }
 
     protected void onStart() {

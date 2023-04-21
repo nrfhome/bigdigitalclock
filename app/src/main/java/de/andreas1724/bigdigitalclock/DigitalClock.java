@@ -15,8 +15,14 @@ import java.util.Locale;
  */
 public class DigitalClock extends View {
 
+    public static final int SECOND_ROW_OFF = 0;
+    public static final int SECOND_ROW_AMPM_ALARM = 1;
+    public static final int SECOND_ROW_AMPM = 2;
+    public static final int SECOND_ROW_DATE = 3;
+
     private static final float TEXT_SIZE_START = 1000f; // arbitrary value to start with
     private static final float AMPM_TIME_RATIO = 0.5f;
+    private static final float DATEROW_TIME_RATIO = 0.3f;
     private static final float ALARM_TIME_RATIO = 1f / 5;
     private static final float GAP_TIME_RATIO = 0.05f;
     private static final float SECONDS_TIME_RATIO =
@@ -33,6 +39,7 @@ public class DigitalClock extends View {
     private static final String LARGEST_ALARM = "{ 20:45[ +3d";
     private static final String LARGEST_SECONDS = "00";
     private static final String LARGEST_AMPM = "AM";
+    private static final String LARGEST_DATEROW = "Wed 9-99";
     private static final String LARGEST_24TIME = "20:00";
     private static final String LARGEST_12TIME = "12:00";
     private static final int NO_FLIP = 0;
@@ -54,13 +61,16 @@ public class DigitalClock extends View {
     private boolean timeValid;
     private SomeText hoursMinutes = new SomeText();
     private SomeText amPm = new SomeText();
+    private SomeText dateRow = new SomeText();
     private SomeText seconds = new SomeText();
     private SomeText alarm = new SomeText();
     private SomeText sync = new SomeText();
     private boolean is24HourFormat;
+    private int secondRowMode;
     private boolean isSeconds = false;
     private Paint hoursMinutesPaint;
     private Paint amPmPaint;
+    private Paint dateRowPaint;
     private Paint secondsPaint;
     private Paint alarmPaint;
     private Paint syncPaint;
@@ -90,6 +100,10 @@ public class DigitalClock extends View {
         syncPaint = new Paint();
         syncPaint.setTypeface(Typeface.MONOSPACE);
         syncPaint.setTextAlign(Paint.Align.LEFT);
+
+        dateRowPaint = new Paint();
+        dateRowPaint.setTypeface(Typeface.SANS_SERIF);
+        dateRowPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     @Override
@@ -97,7 +111,7 @@ public class DigitalClock extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         canvasWidth = w;
         canvasHeight = h;
-        init();
+        init(is24HourFormat, secondRowMode);
     }
 
     public void showSeconds(boolean isSeconds) {
@@ -219,8 +233,13 @@ public class DigitalClock extends View {
         dy *= Math.random() * 2 > 1 ? -1: 1;
     }
 
-    public void init() {
-        is24HourFormat = DateFormat.is24HourFormat(context);
+    public void init(boolean is24HourFormat, int secondRowMode) {
+        this.is24HourFormat = is24HourFormat;
+        this.secondRowMode = secondRowMode;
+        if (is24HourFormat && secondRowMode == SECOND_ROW_AMPM) {
+            this.secondRowMode = SECOND_ROW_OFF;
+        }
+
         hoursMinutesTextSize = getWidestPossibleTextSize();
         setAllTextSizes(hoursMinutesTextSize);
         recalculateIfTextTooHigh();
@@ -251,12 +270,15 @@ public class DigitalClock extends View {
         amPmPaint.getTextBounds(LARGEST_AMPM, 0, LARGEST_AMPM.length(), r);
         amPm.x = boundingRect.right - r.width() - r.left;
         amPm.y = boundingRect.bottom - r.bottom;
+        dateRowPaint.getTextBounds(LARGEST_DATEROW, 0, LARGEST_DATEROW.length(), r);
+        dateRow.x = boundingRect.left + (boundingRect.right - boundingRect.left) / 2;
+        dateRow.y = boundingRect.bottom - r.bottom;
         sync.x = boundingRect.left;
         sync.y = hoursMinutes.y;
     }
 
     private void calculateBoundingRect() {
-        String widestTime = is24HourFormat? LARGEST_24TIME: LARGEST_12TIME;
+        String widestTime = is24HourFormat ? LARGEST_24TIME: LARGEST_12TIME;
         hoursMinutesPaint.getTextBounds(widestTime, 0, widestTime.length(), r);
         int width = r.width();
         if (isSeconds) {
@@ -297,10 +319,25 @@ public class DigitalClock extends View {
         int amPmHeight = r.height();
         alarmPaint.getTextBounds(LARGEST_ALARM, 0, LARGEST_ALARM.length(), r);
         int alarmHeight = r.height();
-        if (!is24HourFormat && (amPmHeight > alarmHeight)) {
-            height += amPmHeight;
-        } else {
-            height += alarmHeight;
+        dateRowPaint.getTextBounds(LARGEST_DATEROW, 0, LARGEST_DATEROW.length(), r);
+        int dateRowHeight = r.height();
+
+        switch (secondRowMode) {
+            case SECOND_ROW_AMPM_ALARM:
+                if (amPmHeight > alarmHeight) {
+                    height += amPmHeight;
+                } else {
+                    height += alarmHeight;
+                }
+                break;
+            case SECOND_ROW_AMPM:
+                height += amPmHeight;
+                break;
+            case SECOND_ROW_DATE:
+                height += dateRowHeight;
+                break;
+            case SECOND_ROW_OFF:
+                break;
         }
         return height;
     }
@@ -309,6 +346,7 @@ public class DigitalClock extends View {
         hoursMinutesPaint.setTextSize(textSize);
         alarmPaint.setTextSize(textSize * ALARM_TIME_RATIO);
         amPmPaint.setTextSize(textSize * AMPM_TIME_RATIO);
+        dateRowPaint.setTextSize(textSize * DATEROW_TIME_RATIO);
         secondsPaint.setTextSize(textSize * SECONDS_TIME_RATIO);
         syncPaint.setTextSize(textSize * SYNC_RATIO);
     }
@@ -329,6 +367,7 @@ public class DigitalClock extends View {
     public void setColors(int color) {
         hoursMinutesPaint.setColor(color);
         amPmPaint.setColor(color);
+        dateRowPaint.setColor(color);
         secondsPaint.setColor(color);
         alarmPaint.setColor(color);
         syncPaint.setColor(color);
@@ -349,19 +388,17 @@ public class DigitalClock extends View {
             int sec = (int) ((milliseconds / 1000) % 60);
             seconds.txt = String.format(Locale.US, "%02d", sec);
         }
+
+        dateRow.txt = TimeTool.getShortDate(milliseconds, isUtc);
     }
 
     public void setSeconds(int sec) {
         seconds.txt = String.format(Locale.US, "%02d", sec);
     }
 
-    public void setAlarm(long milliseconds, boolean hideAlarm) {
+    public void setAlarm(long milliseconds) {
         if (milliseconds == 0) {
-            if (hideAlarm) {
-                alarm.txt = "";
-            } else {
-                alarm.txt = "}";
-            }
+            alarm.txt = "}";
             return;
         } else if (milliseconds < 0) {
             alarm.txt = "{";
@@ -398,9 +435,15 @@ public class DigitalClock extends View {
             canvas.drawText(seconds.txt, seconds.x, seconds.y, secondsPaint);
         }
         canvas.drawText(hoursMinutes.txt, hoursMinutes.x, hoursMinutes.y, hoursMinutesPaint);
-        canvas.drawText(alarm.txt, alarm.x, alarm.y, alarmPaint);
-        if (!is24HourFormat) {
+        if (secondRowMode == SECOND_ROW_AMPM_ALARM) {
+            canvas.drawText(alarm.txt, alarm.x, alarm.y, alarmPaint);
+        }
+        if (secondRowMode == SECOND_ROW_AMPM ||
+                secondRowMode == SECOND_ROW_AMPM_ALARM) {
             canvas.drawText(amPm.txt, amPm.x, amPm.y, amPmPaint);
+        }
+        if (secondRowMode == SECOND_ROW_DATE) {
+            canvas.drawText(dateRow.txt, dateRow.x, dateRow.y, dateRowPaint);
         }
     }
 
