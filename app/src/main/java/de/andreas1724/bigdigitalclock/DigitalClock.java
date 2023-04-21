@@ -385,7 +385,7 @@ public class DigitalClock extends View {
     }
 
     public void setRxCount(long rxCount) {
-        sync.txt = String.format("SYNC %04d", new Long(rxCount % 10000));
+        sync.txt = String.format(Locale.US, "SYNC %04d", rxCount % 10000);
     }
 
     @Override
