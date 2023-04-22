@@ -52,35 +52,51 @@ public class TimeBeaconReceiverService extends Service {
     }
 
     public static void maybeResync(Context context) {
-        if (timeSinceLastUpdate() >= (60 * 60 * 1000) && timeSinceLastResyncAttempt() > (60 * 1000)) {
+        long lastUpdate = timeSinceLastUpdate(), retryInterval = 120;
+        if (lastUpdate < (60 * 60 * 1000)) {
+            // No need to update more than once per hour
+            return;
+        }
+        if (lastUpdate == Long.MAX_VALUE) {
+            // Shorten the interval if this is the initial sync
+            // We'll give the BT stack a few seconds to quiesce between sync attempts
+            retryInterval = 15;
+        }
+        if (timeSinceLastResyncAttempt() > (retryInterval * 1000)) {
             Intent intent = new Intent(context, TimeBeaconReceiverService.class);
             context.startService(intent);
         }
     }
 
     public static boolean isRecentUpdateAvailable() {
-        synchronized (mLock) {
-            if (lastRxRealtime == 0) {
-                return false;
-            }
-            return timeSinceLastUpdate() <= (3 * 60 * 60 * 1000);
-        }
+        // If there hasn't been an update in 3 hours, regard the timestamp
+        // as stale since the clocks may have drifted
+        return timeSinceLastUpdate() <= (3 * 60 * 60 * 1000);
     }
 
     private static long timeSinceLastResyncAttempt() {
         synchronized (mLock) {
+            if (lastResyncAttempt == 0) {
+                return Long.MAX_VALUE;
+            }
             return SystemClock.elapsedRealtime() - lastResyncAttempt;
         }
     }
 
     private static long timeSinceLastUpdate() {
         synchronized (mLock) {
+            if (lastRxRealtime == 0) {
+                return Long.MAX_VALUE;
+            }
             return SystemClock.elapsedRealtime() - lastRxRealtime;
         }
     }
 
     public static long currentTimeMillis() {
         synchronized (mLock) {
+            if (lastRxTimestamp == 0) {
+                return 0;
+            }
             return lastRxTimestamp + SystemClock.elapsedRealtime() - lastRxRealtime;
         }
     }
